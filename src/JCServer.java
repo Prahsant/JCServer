@@ -14,6 +14,7 @@ import com.sun.javacard.apduio.CadTransportException;
 public class JCServer {
   private static final String JCOP_PROVIDER = "jcop";
   private static final String JCARDSIM_PROVIDER = "jcardsim";
+  private static final String JCARDSIM_IDENTITY = "jcardsim_identity";
 
   public static void main(String[] args) {
     if (args.length < 2) {
@@ -32,6 +33,8 @@ public class JCServer {
       simulator = new JCOPSimulator(args[2], args[3], args[4]);
     } else if (JCARDSIM_PROVIDER.equals(providerName)) {
       simulator = new JCardSimulator();
+    } else if (JCARDSIM_IDENTITY.equals(providerName)) {
+    	simulator = new JCardSimIdentityCredential();
     } else {
       System.out.println("Unsupported provider.");
       return;
@@ -46,6 +49,7 @@ public class JCServer {
 
       byte[] outData;
 
+      System.out.println("Listening on port :" + port);
       while (true) {
         try {
           Socket socket = serverSocket.accept();
@@ -70,10 +74,10 @@ public class JCServer {
                 try {
                   outBytes = simulator.executeApdu(Arrays.copyOfRange(inBytes, 0, index + readLen));
                   outData = simulator.decodeDataOut();
-                  System.out.println("Return Data = " + Utils.byteArrayToHexString(outData));
                   byte[] finalOutData = new byte[outData.length + outBytes.length];
                   System.arraycopy(outData, 0, finalOutData, 0, outData.length);
                   System.arraycopy(outBytes, 0, finalOutData, outData.length, outBytes.length);
+                  //System.out.println("Return Data = " + Utils.byteArrayToHexString(finalOutData));
                   output.write(finalOutData);
                   output.flush();
                   index = 0;

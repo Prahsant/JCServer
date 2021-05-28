@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Applet"/>
+	<classpathentry kind="lib" path="lib/apduio-RELEASE71.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-ext-jdk15on.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on.jar"/>
+	<classpathentry kind="lib" path="lib/jcardsim-3.0.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ocf_lib.jar"/>
+	<classpathentry kind="lib" path="lib/ocf.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.29.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/IdentityCredential"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

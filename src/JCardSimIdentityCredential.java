@@ -10,7 +10,7 @@ import javacard.framework.AID;
 public class JCardSimIdentityCredential implements Simulator {
 	private CardSimulator simulator;
 	private ResponseAPDU response;
-	static final String AID = "A00000006203020C010101";
+	static final String AID = "A00000006203020C010102";
 
 	public JCardSimIdentityCredential() {
 	    simulator = new CardSimulator();
@@ -49,8 +49,8 @@ public class JCardSimIdentityCredential implements Simulator {
 	public byte[] executeApdu(byte[] apdu) throws Exception {
 	    CommandAPDU apduCmd = new CommandAPDU(apdu);
 	    response = simulator.transmitCommand(apduCmd);
-	    if(!Utils.byteArrayToHexString(intToByteArray(response.getSW())).equals("9000")) {
-			System.out.println("Failed executing APDU = " + Utils.byteArrayToHexString(apdu));
+		System.out.println("Executing APDU = " + Utils.byteArrayToHexString(apdu));
+		if(!Utils.byteArrayToHexString(intToByteArray(response.getSW())).equals("9000")) {
 			System.out.println("Status = " + Utils.byteArrayToHexString(intToByteArray(response.getSW())));
 		}
 	    return intToByteArray(response.getSW());

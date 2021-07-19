@@ -50,6 +50,7 @@ public class JCOPOpenCard {
 
   public static final int port = 8050;
   public static final String address = "localhost";
+  public static final String host = "localhost";
   private boolean isConnected = false;
   SecurityDomainCardService sds = null;
   JCOPSimCardTerminal terminal = null;
@@ -346,10 +347,10 @@ public class JCOPOpenCard {
       AppletID appId = new AppletID(aid);
       ResponseAPDU respApdu = sds.select(appId, false);
       if (respApdu.sw() != 0x9000) {
-        System.out.println("Failed to select applet. error:" + respApdu.sw());
+        System.out.println("Failed to select applet[" + appId.toString() + "]. error:" + respApdu.sw());
         throw new JCOPException("Failed to select applet. error:" + respApdu.sw());
       }
-      System.out.println("Keymaster Applet selected successfully.");
+      System.out.println("Applet selected successfully.");
     } catch (CardTerminalException e) {
       throw new JCOPException(e.getMessage());
     }
@@ -365,7 +366,7 @@ public class JCOPOpenCard {
     AppletID appId = null;
     Security.addProvider(new BouncyCastleProvider());
     try {
-      terminal = new JCOPSimCardTerminal("jcopsimulator", "simulator", "localhost", "localhost", 8050, 0);
+      terminal = new JCOPSimCardTerminal("jcopsimulator", "simulator", address, host, port, 0);
 
       terminal.connect();
 

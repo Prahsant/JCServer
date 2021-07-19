@@ -13,6 +13,7 @@ import com.sun.javacard.apduio.CadTransportException;
  */
 public class JCServer {
   private static final String JCOP_PROVIDER = "jcop";
+  private static final String JCOP_IDENTITY = "jcop_identity";
   private static final String JCARDSIM_PROVIDER = "jcardsim";
   private static final String JCARDSIM_IDENTITY = "jcardsim_identity";
 
@@ -31,6 +32,12 @@ public class JCServer {
         return;
       }
       simulator = new JCOPSimulator(args[2], args[3], args[4]);
+    } else if (JCOP_IDENTITY.equals(providerName)) {
+      if (args.length < 8) {
+        System.out.println("Both keymaster and identity credential AppletAIDs, PackageAIDs and cap file paths are expected as arguments for JCOP Identity Credential.");
+        return;
+      }
+      simulator = new JCOPSimulator(args[2], args[3], args[4], args[5], args[6], args[7]);
     } else if (JCARDSIM_PROVIDER.equals(providerName)) {
       simulator = new JCardSimulator();
     } else if (JCARDSIM_IDENTITY.equals(providerName)) {
@@ -68,8 +75,8 @@ public class JCServer {
             System.out.println("Socket input buffer size: " + socket.getReceiveBufferSize());
             while ((readLen = isReader.read(inBytes, index, 1024 * 5)) > 0) {
               if (readLen > 0) {
-                System.out.println("Bytes read from index (" + index + ") socket: " + readLen + " Estimate read: "
-                    + isReader.available());
+                //System.out.println("Bytes read from index (" + index + ") socket: " + readLen + " Estimate read: "
+                //    + isReader.available());
                 byte[] outBytes;
                 try {
                   outBytes = simulator.executeApdu(Arrays.copyOfRange(inBytes, 0, index + readLen));

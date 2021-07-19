@@ -1,19 +1,30 @@
-import opencard.core.terminal.CommandAPDU;
 
 public class JCOPSimulator implements Simulator {
 
   private JCOPOpenCard openCardSim = null;
 
-  private byte[] keymasterAppletId;
-  private byte[] keymasterAppletPackage;
-  private String capFilePath;
+  private byte[] kmAppletId;
+  private byte[] icAppletId;
+  private byte[] kmPackageAid;
+  private byte[] icPackageAid;
+  private String kmCapFilePath;
+  private String icCapFilePath;
 
   private opencard.core.terminal.ResponseAPDU response;
 
   public JCOPSimulator(String pckgAid, String appletAid, String capFilePath) {
-    keymasterAppletPackage = Utils.hexStringToByteArray(pckgAid);
-    keymasterAppletId = Utils.hexStringToByteArray(appletAid);
-    this.capFilePath = capFilePath;
+    kmPackageAid = Utils.hexStringToByteArray(pckgAid);
+    kmAppletId = Utils.hexStringToByteArray(appletAid);
+    this.kmCapFilePath = capFilePath;
+  }
+
+  public JCOPSimulator(String kmPkgAid, String kmAppletAid, String kmCapFilePath, String icPkgAid, String icAppletAid, String icCapFilePath) {
+    this.kmPackageAid = Utils.hexStringToByteArray(kmPkgAid);
+    this.icPackageAid = Utils.hexStringToByteArray(icPkgAid);
+    this.kmAppletId = Utils.hexStringToByteArray(kmAppletAid);
+    this.icAppletId = Utils.hexStringToByteArray(icAppletAid);
+    this.kmCapFilePath = kmCapFilePath;
+    this.icCapFilePath = icCapFilePath;
   }
 
   @Override
@@ -23,7 +34,12 @@ public class JCOPSimulator implements Simulator {
       try {
         openCardSim.connect();
         // openCardSim.deleteApplet(keymasterAppletPackage);
-        openCardSim.installApplet(capFilePath, keymasterAppletId, keymasterAppletPackage);
+        if(kmCapFilePath != null) {
+          openCardSim.installApplet(kmCapFilePath, kmAppletId, kmPackageAid);
+        }
+        if(icCapFilePath != null) {
+          openCardSim.installApplet(icCapFilePath, icAppletId, icPackageAid);
+        }
       } catch (JCOPException e) {
         openCardSim.close();
         throw new JCOPException(e.getMessage());
@@ -33,13 +49,15 @@ public class JCOPSimulator implements Simulator {
 
   @Override
   public void disconnectSimulator() throws Exception {
-    openCardSim.deleteApplet(keymasterAppletPackage);
+    openCardSim.deleteApplet(kmPackageAid);
+    openCardSim.deleteApplet(icPackageAid);
     openCardSim.close();
   }
 
   @Override
   public boolean setupKeymasterOnSimulator() throws Exception {
-    openCardSim.selectApplet(keymasterAppletId);
+    openCardSim.selectApplet(kmAppletId);
+    openCardSim.selectApplet(icAppletId);
     return true;
   }
 
@@ -60,7 +78,9 @@ public class JCOPSimulator implements Simulator {
     }
     opencard.core.terminal.CommandAPDU cmdApdu = new opencard.core.terminal.CommandAPDU(apdu);
     response = openCardSim.transmitCommand(cmdApdu);
-    System.out.println("Status = " + Utils.byteArrayToHexString(intToByteArray(response.sw())));
+    if(response.sw() != 36864 || Utils.byteArrayToHexString(apdu).startsWith("8039")) {
+      System.out.println("Response = " + Utils.byteArrayToHexString(response.getBytes()));
+    }
     return intToByteArray(response.sw());
   }
 
@@ -100,7 +120,6 @@ public class JCOPSimulator implements Simulator {
 
   @Override
   public byte[] decodeDataOut() {
-    // TODO Auto-generated method stub
     return response.getBytes();
   }
 

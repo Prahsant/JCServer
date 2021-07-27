@@ -1,7 +1,7 @@
 
 public class JCOPSimulator implements Simulator {
 
-  private JCOPOpenCard openCardSim = null;
+  private static JCOPOpenCard openCardSim = JCOPOpenCard.getInstance();
 
   private byte[] kmAppletId;
   private byte[] icAppletId;
@@ -19,45 +19,63 @@ public class JCOPSimulator implements Simulator {
   }
 
   public JCOPSimulator(String kmPkgAid, String kmAppletAid, String kmCapFilePath, String icPkgAid, String icAppletAid, String icCapFilePath) {
-    this.kmPackageAid = Utils.hexStringToByteArray(kmPkgAid);
-    this.icPackageAid = Utils.hexStringToByteArray(icPkgAid);
-    this.kmAppletId = Utils.hexStringToByteArray(kmAppletAid);
-    this.icAppletId = Utils.hexStringToByteArray(icAppletAid);
-    this.kmCapFilePath = kmCapFilePath;
-    this.icCapFilePath = icCapFilePath;
+    if(kmPkgAid != null && kmAppletAid != null && kmCapFilePath != null) {
+      this.kmPackageAid = Utils.hexStringToByteArray(kmPkgAid);
+      this.kmAppletId = Utils.hexStringToByteArray(kmAppletAid);
+      this.kmCapFilePath = kmCapFilePath;
+    }
+    if(icPkgAid != null && icAppletAid != null && icCapFilePath != null) {
+      this.icPackageAid = Utils.hexStringToByteArray(icPkgAid);
+      this.icAppletId = Utils.hexStringToByteArray(icAppletAid);
+      this.icCapFilePath = icCapFilePath;
+    }
   }
 
   @Override
   public void initaliseSimulator() throws Exception {
-    openCardSim = JCOPOpenCard.getInstance();
-    if (!openCardSim.isConnected()) {
-      try {
-        openCardSim.connect();
-        // openCardSim.deleteApplet(keymasterAppletPackage);
-        if(kmCapFilePath != null) {
-          openCardSim.installApplet(kmCapFilePath, kmAppletId, kmPackageAid);
+    synchronized (openCardSim) {
+      if (!openCardSim.isConnected()) {
+        try {
+          openCardSim.connect();
+          if (kmCapFilePath != null) {
+            //In-case applets are installed from eclipse for debug purpose comment below line
+            openCardSim.installApplet(kmCapFilePath, kmAppletId, kmPackageAid);
+          }
+          if (icCapFilePath != null) {
+            //In-case applets are installed from eclipse for debug purpose comment below line
+            openCardSim.installApplet(icCapFilePath, icAppletId, icPackageAid);
+          }
+        } catch (JCOPException e) {
+          openCardSim.close();
+          throw new JCOPException(e.getMessage());
         }
-        if(icCapFilePath != null) {
-          openCardSim.installApplet(icCapFilePath, icAppletId, icPackageAid);
-        }
-      } catch (JCOPException e) {
-        openCardSim.close();
-        throw new JCOPException(e.getMessage());
       }
     }
   }
 
   @Override
   public void disconnectSimulator() throws Exception {
-    openCardSim.deleteApplet(kmPackageAid);
-    openCardSim.deleteApplet(icPackageAid);
+    synchronized (openCardSim) {
+      if (kmCapFilePath != null) {
+        openCardSim.deleteApplet(kmPackageAid);
+      }
+      if (icCapFilePath != null) {
+        openCardSim.deleteApplet(icPackageAid);
+      }
+    }
     openCardSim.close();
   }
 
   @Override
   public boolean setupKeymasterOnSimulator() throws Exception {
-    openCardSim.selectApplet(kmAppletId);
-    openCardSim.selectApplet(icAppletId);
+    synchronized (openCardSim) {
+      if (kmCapFilePath != null) {
+        openCardSim.selectApplet(kmAppletId);
+      }
+      if (icCapFilePath != null) {
+        //openCardSim.selectApplet(icAppletId); IC applet is selected from HAL.
+      }
+    }
     return true;
   }
 
@@ -77,8 +95,10 @@ public class JCOPSimulator implements Simulator {
       throw new IllegalArgumentException();
     }
     opencard.core.terminal.CommandAPDU cmdApdu = new opencard.core.terminal.CommandAPDU(apdu);
-    response = openCardSim.transmitCommand(cmdApdu);
-    if(response.sw() != 36864 || Utils.byteArrayToHexString(apdu).startsWith("8039")) {
+    synchronized (openCardSim) {
+      response = openCardSim.transmitCommand(cmdApdu);
+    }
+    if(response.sw() != 36864 || Utils.byteArrayToHexString(apdu).startsWith("8015")) {
       System.out.println("Response = " + Utils.byteArrayToHexString(response.getBytes()));
     }
     return intToByteArray(response.sw());

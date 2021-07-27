@@ -356,11 +356,11 @@ public class JCOPOpenCard {
     }
   }
 
-  public boolean isConnected() {
+  public synchronized boolean isConnected() {
     return isConnected;
   }
 
-  public boolean connect() throws JCOPException {
+  public synchronized boolean connect() throws JCOPException {
 
     ResponseAPDU resp = null;
     AppletID appId = null;

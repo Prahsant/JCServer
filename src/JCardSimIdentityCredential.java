@@ -35,7 +35,7 @@ public class JCardSimIdentityCredential implements Simulator {
 	public boolean setupKeymasterOnSimulator() throws Exception {
 	    AID appletAID1 = AIDUtil.create(AID);
 	    // Select applet
-	    simulator.selectApplet(appletAID1);
+	    //simulator.selectApplet(appletAID1);
 	    // provision attest key
 	    // return provisionCmd(simulator);// && setBootParams(simulator);
 	    return true;
